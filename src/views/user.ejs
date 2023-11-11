@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Latest compiled and minified CSS -->
+  <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+  />
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LIST USERS</title>
+  </head>
+
+  <body>
+    <div className="container">
+      <div className="row">
+        <div className="user-infor-container">
+          <form action="/user/create-user" method="POST" class="ml-5 mt-5">
+            <div className="pt-3">
+              <h3>Create a new user</h3>
+            </div>
+            <div className="col-6">
+              <label for="email" className="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control col-4"
+                id="email"
+                name="email"
+                placeholder="Email"
+                required
+              />
+            </div>
+            <div className="col-6"></div>
+            <div className="mb-3 col-6">
+              <label for="password" className="form-label">Password</label>
+              <input
+                type="text"
+                class="form-control col-4"
+                id="password"
+                name="password"
+                placeholder="Password"
+                required
+              />
+            </div>
+            <div className="col-6"></div>
+            <div className="mb-3 col-6">
+              <label for="username" className="form-label">Username</label>
+              <input
+                type="text"
+                class="form-control col-4"
+                id="username"
+                name="username"
+                placeholder="Username"
+                required
+              />
+            </div>
+          </div>
+            <button type="submit" class="btn btn-primary mt-3">Sign in</button>
+          </form>
+        <div class="table-users mt-3">
+          <h3 class="ml-5">Table users:</h3>
+          <table class="table table-hover table-bordered ml-5">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Email</th>
+              <th scope="col">Username</th>
+              <th>Action</th>
+            </tr>
+
+            <tbody>
+              <% userList.forEach(function(item,index){ %>
+              <tr>
+                <th scope="row"><%= item.id %></th>
+                <td><%=item.email %></td>
+
+                <td><%=item.username %></td>
+                <td>
+                  <a class="btn btn-warning" href="/update-user/<%= item.id %>"
+                    >Edit</a
+                  >
+                  <form
+                    style="display: inline"
+                    action="/delete-user/<%= item.id %>"
+                    method="POST"
+                  >
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
