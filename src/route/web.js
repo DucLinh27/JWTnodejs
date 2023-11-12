@@ -14,6 +14,8 @@ const initWebRoutes = (app) => {
   router.post("/api/register", apiController.handleRegister);
   router.post("/api/login", apiController.handleLogin);
 
+  router.get("/api/test-api", apiController.testApi);
+
   return app.use("/", router);
-}
+};
 export default initWebRoutes;

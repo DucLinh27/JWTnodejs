@@ -111,6 +111,7 @@ let updateUserInfor = async (email, username, id) => {
   //   console.log(err);
   // }
 };
+
 module.exports = {
   createNewUser,
   getUserList,

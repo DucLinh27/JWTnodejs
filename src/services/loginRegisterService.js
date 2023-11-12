@@ -3,21 +3,16 @@ import bcrypt from "bcryptjs";
 import { Op } from "sequelize";
 const salt = bcrypt.genSaltSync(10);
 
-// const hashUserPassword = (hashUserPassword) => {
-//   let hashPassword = bcrypt.hashSync(hashUserPassword, salt);
-//   return hashPassword;
+// let hashUserPassword = (password) => {
+//   return new Promise(async (resolve, reject) => {
+//     try {
+//       let hashPassWord = await bcrypt.hashSync(password, salt);
+//       resolve(hashPassWord);
+//     } catch (e) {
+//       reject(e);
+//     }
+//   });
 // };
-let hashUserPassword = (password) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let hashPassWord = await bcrypt.hashSync(password, salt);
-
-      resolve(hashPassWord);
-    } catch (e) {
-      reject(e);
-    }
-  });
-};
 let checkEmailExist = async (userEmail) => {
   let isExist = await db.User.findOne({
     where: { email: userEmail },
@@ -74,42 +69,129 @@ const registerNewUser = async (rawUserData) => {
     };
   }
 };
-const checkPassword = (inputPassword, hashPassWord) => {
-  return bcrypt.compareSync(inputPassword, hashPassWord);
-};
-const handleUserLogin = async (rawData) => {
-  try {
-    let user = await db.User.findOne({
-      where: {
-        [Op.or]: [{ email: rawData.valueLogin }, { phone: rawData.valueLogin }],
-      },
-    });
-    console.log("Founded user", user.get({ plain: true }));
-    console.log("Founded user", user);
+// const checkPassword = (inputPassword, hashPassWord) => {
+//   return bcrypt.compareSync(inputPassword, hashPassWord);
+// };
+// const handleUserLogin = async (rawData) => {
+//   try {
+//     let user = await db.User.findOne({
+//       where: {
+//         [Op.or]: [{ email: rawData.valueLogin }, { phone: rawData.valueLogin }],
+//       },
+//     });
 
-    if (user) {
-      let isCorrectPassword = checkPassword(rawData.password, user.password);
-      if (isCorrectPassword === true) {
-        return {
-          EM: "oke",
-          EC: 0,
-          DT: "",
-        };
-      }
-      console.log("Founded user pass", user);
+//     if (user) {
+//       console.log("Founded user:", user.get({ plain: true }));
+//       console.log("Founded user:", user);
+
+//       let isCorrectPassword = checkPassword(rawData.password, user.password);
+
+//       if (isCorrectPassword) {
+//         return {
+//           EM: "Login successful",
+//           EC: 0,
+//           DT: "", // You may want to return user data here
+//         };
+//       } else {
+//         console.log("Incorrect password for user:", user);
+//         return {
+//           EM: "Your email/phone number or password is incorrect",
+//           EC: 1,
+//           DT: "",
+//         };
+//       }
+//     } else {
+//       console.log("User not found");
+//       return {
+//         EM: "Your email/phone number or password is incorrect",
+//         EC: 1,
+//         DT: "",
+//       };
+//     }
+//   } catch (error) {
+//     console.error("Error in handleUserLogin:", error);
+//     return {
+//       EM: "Something went wrong in the service...",
+//       EC: -2,
+//       DT: "",
+//     };
+//   }
+// };
+let hashUserPassword = (password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      //lưu ý, truyền vào đúng password cần hash
+      // let hashPassWord = await bcrypt.hashSync("B4c0/\/", salt); => copy paste mà ko edit nè
+      let hashPassWord = await bcrypt.hashSync(password, salt);
+
+      resolve(hashPassWord);
+    } catch (e) {
+      reject(e);
     }
-    return {
-      EM: "Your email/phone number or password is incorrect",
-      EC: 1,
-      DT: "",
-    };
-  } catch (e) {
-    return {
-      EM: "Something wrongs in service...",
-      EC: -2,
-    };
-  }
+  });
 };
+let handleUserLogin = (email, password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let userData = {};
+      let isExist = await checkUserEmail(email);
+      if (isExist) {
+        //user already exist
+        let user = await db.User.findOne({
+          attributes: [
+            "id",
+            "email",
+            "roleId",
+            "password",
+            "firstName",
+            "lastName",
+          ],
+          where: { email: email },
+          raw: true,
+        });
+        if (user) {
+          //compare password: dùng cách 1 hay cách 2 đều chạy đúng cả =))
+          // Cách 1: dùng asynchronous (bất đồng bộ)
+          let check = await bcrypt.compare(password, user.password);
+
+          // Cách 2: dùng synchronous  (đồng bộ)
+          // let check = bcrypt.compareSync(password, user.password);
+
+          if (check) {
+            userData.errCode = 0;
+            userData.errMessage = "OK";
+            userData.DT = {
+              access_token: "",
+            };
+
+            delete user.password;
+            userData.user = user;
+          } else {
+            userData.errCode = 3;
+            userData.errMessage = "Wrong password";
+          }
+        } else {
+          userData.errCode = 2;
+          userData.errMessage = `User not found`;
+        }
+      } else {
+        //return error
+        userData.errCode = 1;
+        userData.errMessage = `Your's Email isn't exist in our system, plz try other email`;
+      }
+      resolve(userData);
+      await getRoles(userData);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+module.exports = {
+  registerNewUser,
+  handleUserLogin,
+};
+
 module.exports = {
   registerNewUser,
   handleUserLogin,
