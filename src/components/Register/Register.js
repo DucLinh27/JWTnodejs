@@ -23,6 +23,17 @@ const Register = (props) => {
   const handleLogin = () => {
     history.push("/login");
   };
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/test-api")
+      .then((response) => {
+        console.log("check data", response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
   const isValidInputs = () => {
     setObjCheckInput(defaultValidInput);
     if (!email) {

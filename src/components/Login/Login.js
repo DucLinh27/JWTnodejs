@@ -20,21 +20,34 @@ const Login = (props) => {
   };
   const handleLogin = async () => {
     setObjValidInput(defaultObjValidInput);
-    if (!valueLogin) {
-      setObjValidInput({ ...defaultObjValidInput, isValidValueLogin: false });
-      toast.error("Please enter your email address or phone number");
-      return;
+    try {
+      if (!valueLogin) {
+        setObjValidInput({ ...defaultObjValidInput, isValidValueLogin: false });
+        toast.error("Please enter your email address or phone number");
+        return;
+      }
+      if (!password) {
+        setObjValidInput({
+          ...defaultObjValidInput,
+          isValidPassword: false,
+        });
+        toast.error("Please enter your password");
+        return;
+      }
+
+      // Assuming loginUser is an asynchronous function
+      await loginUser(valueLogin, password);
+
+      // If the login is successful, you can redirect or perform other actions here
+      // For example:
+      // history.push("/dashboard");
+    } catch (error) {
+      // Handle errors here
+      console.error("Error during login:", error);
+      toast.error("Login failed. Please check your credentials.");
     }
-    if (!password) {
-      setObjValidInput({
-        ...defaultObjValidInput,
-        isValidPassword: false,
-      });
-      toast.error("Please enter your password");
-      return;
-    }
-    await loginUser(valueLogin, password);
   };
+
   return (
     <div className="login-container">
       <div className="container">
